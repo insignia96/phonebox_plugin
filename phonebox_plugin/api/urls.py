@@ -1,8 +1,8 @@
-from rest_framework.routers import DefaultRouter
+from netbox.api.routers import NetBoxRouter
 from . import views
 
 
-router = DefaultRouter()
+router = NetBoxRouter()
 router.APIRootView = views.PhoneBoxPluginRootView
 
 router.register(r'numbers', views.NumberViewSet)

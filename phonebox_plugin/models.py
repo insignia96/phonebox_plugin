@@ -1,12 +1,8 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
-from extras.models import TaggedItem
-from netbox.models import ChangeLoggedModel
-from utilities.querysets import RestrictedQuerySet
 from django.core.validators import RegexValidator
-from taggit.managers import TaggableManager
 from django.urls import reverse
+from netbox.models import NetBoxModel
 from .choices import VoiceCircuitTypeChoices, VOICE_CIRCUIT_ASSIGNMENT_MODELS
 
 number_validator = RegexValidator(
@@ -15,7 +11,7 @@ number_validator = RegexValidator(
 )
 
 
-class Number(ChangeLoggedModel):
+class Number(NetBoxModel):
     """A Number represents a single telephone number of an arbitrary format.
     A Number can contain only valid DTMF characters and leading plus sign for E.164 support:
       - leading plus ("+") sign (optional)
@@ -60,23 +56,19 @@ class Number(ChangeLoggedModel):
         null=True,
         related_name="forward_to_set"
     )
-    tags = TaggableManager(through=TaggedItem)
-
-    objects = RestrictedQuerySet.as_manager()
-
-    csv_headers = ['number', 'tenant', 'region', 'description', 'provider', 'forward_to']
 
     def __str__(self):
         return str(self.number)
 
     def get_absolute_url(self):
-        return reverse("plugins:phonebox_plugin:number_view", kwargs={"pk": self.pk})
+        return reverse("plugins:phonebox_plugin:number", kwargs={"pk": self.pk})
 
     class Meta:
+        ordering = ("number", "tenant")
         unique_together = ("number", "tenant",)
 
 
-class VoiceCircuit(ChangeLoggedModel):
+class VoiceCircuit(NetBoxModel):
     """A Voice Circuit represents a single circuit of one of the following types:
     - SIP Trunk.
     - Digital Voice Circuit (BRI/PRI/etc).
@@ -121,7 +113,6 @@ class VoiceCircuit(ChangeLoggedModel):
         null=True,
         related_name="vc_site_set"
     )
-    tags = TaggableManager(through=TaggedItem)
 
     sip_source = models.CharField(
         max_length=255,
@@ -133,7 +124,7 @@ class VoiceCircuit(ChangeLoggedModel):
     )
 
     assigned_object_type = models.ForeignKey(
-        to=ContentType,
+        to='contenttypes.ContentType',
         limit_choices_to=VOICE_CIRCUIT_ASSIGNMENT_MODELS,
         on_delete=models.PROTECT,
         related_name='+',
@@ -149,12 +140,11 @@ class VoiceCircuit(ChangeLoggedModel):
         fk_field='assigned_object_id'
     )
 
-    objects = RestrictedQuerySet.as_manager()
-
-    csv_headers = ['name', 'voice_circuit_type', 'tenant', 'region', 'site', 'description', 'provider']
-
     def __str__(self):
         return str(self.name)
 
     def get_absolute_url(self):
-        return reverse("plugins:phonebox_plugin:voice_circuit_view", kwargs={"pk": self.pk})
+        return reverse("plugins:phonebox_plugin:voicecircuit", kwargs={"pk": self.pk})
+
+    class Meta:
+        ordering = ("name",)

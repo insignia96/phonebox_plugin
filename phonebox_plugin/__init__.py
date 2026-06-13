@@ -1,26 +1,18 @@
-from packaging import version
-from django.conf import settings
-NETBOX_CURRENT_VERSION = version.parse(settings.VERSION)
-
-if NETBOX_CURRENT_VERSION >= version.parse("4.0.0"):
-    from netbox.plugins import PluginConfig
-else:
-    from extras.plugins import PluginConfig
+from netbox.plugins import PluginConfig
 
 
 class PhoneBoxConfig(PluginConfig):
     name = 'phonebox_plugin'
     verbose_name = 'PhoneBox Plugin'
     description = 'Telephone Number Management Plugin for NetBox.'
-    version = 'v0.0.10'
-    author = 'Igor Korotchenkov'
-    author_email = 'iDebugAll@gmail.com'
+    version = '1.0.0'
+    author = 'Isaiah Olson'
+    author_email = 'insignia96@gmail.com'
     base_url = 'phonebox'
-    min_version = "4.1.0"
+    min_version = '4.5.0'
+    max_version = '4.6.99'
     required_settings = []
     default_settings = {}
-    caching_config = {
-        '*': None
-    }
+
 
 config = PhoneBoxConfig
